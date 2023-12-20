@@ -7,7 +7,6 @@ const listTodo = async () => {
     console.error(error);
   }
 };
-
 (async () => {
   await listTodo();
 })();
