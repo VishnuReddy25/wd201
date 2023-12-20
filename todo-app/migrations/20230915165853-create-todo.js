@@ -1,8 +1,7 @@
-'use strict';
-
+"use strict";
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Todos', {
+    await queryInterface.createTable("Todos", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,10 +11,13 @@ module.exports = {
       title: {
         type: Sequelize.STRING,
         allowNull: false,
+        validate: {
+          notNull: true,
+          len: 5,
+        },
       },
       dueDate: {
         type: Sequelize.DATEONLY,
-        allowNull: false,
       },
       completed: {
         type: Sequelize.BOOLEAN,
@@ -31,6 +33,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Todos');
-  }
+    await queryInterface.dropTable("Todos");
+  },
 };
