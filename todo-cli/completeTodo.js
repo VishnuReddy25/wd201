@@ -7,7 +7,6 @@ const markAsComplete = async (id) => {
     console.error(error);
   }
 };
-
 (async () => {
   const { id } = argv;
   if(!id) {
