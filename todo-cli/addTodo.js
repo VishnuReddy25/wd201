@@ -1,27 +1,52 @@
-var argv = require('minimist')(process.argv.slice(2));
-const db = require("./models/index")
+"use strict";
 
-const createTodo = async (params) => {
-  try {
-    await db.Todo.addTask(params);
-  } catch (error) {
-    console.error(error);
-  }
-};
+const fs = require("fs");
+const path = require("path");
+const Sequelize = require("sequelize");
+const process = require("process");
 
-const getJSDate = (days) => {
-  if (!Number.isInteger(days)) {
-    throw new Error("Need to pass an integer as days");
-  }
-  const today = new Date();
-  const oneDay = 60 * 60 * 24 * 1000;
-  return new Date(today.getTime() + days * oneDay)
+const basename = path.basename(__filename);
+const env = process.env.NODE_ENV || "development";
+const config = require(__dirname + "/../config/config.json")[env];
+const db = {};
+
+let sequelize;
+
+if (config.use_env_variable) {
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  );
 }
-(async () => {
-  const { title, dueInDays } = argv;
-  if (!title || dueInDays === undefined) {
-    throw new Error("title and dueInDays are required. \nSample command: node addTodo.js --title=\"Buy milk\" --dueInDays=-2 ")
+
+fs.readdirSync(__dirname)
+  .filter((file) => {
+    return (
+      file.indexOf(".") !== 0 &&
+      file !== basename &&
+      file.slice(-3) === ".js" &&
+      file.indexOf(".test.js") === -1
+    );
+  })
+  .forEach((file) => {
+    const model = require(path.join(__dirname, file))(
+      sequelize,
+      Sequelize.DataTypes
+    );
+    db[model.name] = model;
+  });
+
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    db[modelName].associate(db);
   }
-  await createTodo({ title, dueDate: getJSDate(dueInDays), completed: false })
-  await db.Todo.showList();
-})();
+});
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
+
+module.exports = db;
