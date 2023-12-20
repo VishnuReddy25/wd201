@@ -4,12 +4,10 @@ const db = require("../models/index");
 const app = require("../app");
 
 let server, agent;
-
 function extractCsrfToken(res) {
   const $ = cheerio.load(res.text);
   return $("[name=_csrf]").val();
 }
-
 const login = async (agent, username, password) => {
   let res = await agent.get("/login");
   let csrfToken = extractCsrfToken(res);
@@ -19,7 +17,6 @@ const login = async (agent, username, password) => {
     _csrf: csrfToken,
   });
 };
-
 describe("todo test suite", () => {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
@@ -144,11 +141,9 @@ describe("todo test suite", () => {
       completed: false,
       "_csrf": csrfToken,
     });
-
     const a = await agent.get("/todos").set("Accept", "application/json");
     const b = JSON.parse(a.text);
     const lastItem = b.dueToday[b.dueToday.length - 1];
-
     res = await agent.get("/todos");
     csrfToken = extractCsrfToken(res);
 
